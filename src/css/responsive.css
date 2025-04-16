@@ -1,0 +1,41 @@
+/* Responsive styles for the eBook store */
+
+@media (max-width: 1200px) {
+    .ebook-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .ebook-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .ebook-list {
+        grid-template-columns: 1fr;
+    }
+
+    .ebook-item {
+        margin: 10px 0;
+    }
+}
+
+.book-detail {
+    padding: 20px;
+}
+
+.book-detail img {
+    max-width: 100%;
+    height: auto;
+}
+
+.book-rating {
+    display: flex;
+    align-items: center;
+}
+
+.book-rating span {
+    margin-left: 5px;
+}

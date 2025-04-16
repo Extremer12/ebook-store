@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eBook Store</title>
+    <link rel="stylesheet" href="src/css/style.css" type="text/css">
+    <link rel="stylesheet" href="src/css/responsive.css" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body style="padding-right: 0;">
+    <!-- Botón toggle fuera del nav -->
+    <button class="menu-toggle" id="menuToggle">
+        <span class="bar"></span>
+    </button>
+
+    <nav class="main-nav">
+        <div class="nav-brand">
+            <h1>eBook Store</h1>
+        </div>
+        
+        <div class="nav-content" id="navContent">
+            <div class="search-container">
+                <input type="text" placeholder="Search eBooks..." id="searchInput">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div class="categories-dropdown">
+                <button class="dropdown-btn">Categorias <i class="fas fa-chevron-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="#self-help">Self Help</a>
+                    <a href="#recipes">Recipes</a>
+                    <a href="#courses">Cursos</a>
+                    <a href="#fiction">Ficcion</a>
+                    <a href="#business">Negocios</a>
+                    <a href="#technology">Technology</a>
+                </div>
+            </div>
+
+            <ul class="nav-links">
+                <li><a href="#home"><i class="fas fa-home"></i> Inicio</a></li>
+                <li><a href="#ebooks"><i class="fas fa-book"></i> Ebooks</a></li>
+                <li><a href="#about"><i class="fas fa-info-circle"></i> About Us</a></li>
+                <li><a href="#contact"><i class="fas fa-envelope"></i> Contacto</a></li>
+                <li>
+                    <a href="#cart">
+                        <i class="fas fa-shopping-cart"></i> 
+                        Carrito
+                        <span class="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    
+    <header>
+        <h1>Bienvenid@ a la eBook Store</h1>
+    </header>
+    <main>
+        <!-- Categorías -->
+        <section class="categories-section">
+            <h2>Categorías</h2>
+            <div class="category-pills">
+                <button class="category-pill active">Todos</button>
+                <button class="category-pill">Programación</button>
+                <button class="category-pill">Marketing Digital</button>
+                <button class="category-pill">Desarrollo Personal</button>
+                <button class="category-pill">Negocios</button>
+                <button class="category-pill">Cocina</button>
+                <button class="category-pill">Ficción</button>
+                <button class="category-pill">Educación</button>
+                <button class="category-pill">Salud y Bienestar</button>
+                <button class="category-pill">Diseño</button>
+            </div>
+        </section>
+
+        <section id="ebook-list">
+            <h2>eBooks Disponibles</h2>
+            <div class="ebook" data-id="1">
+                <div class="book-cover">
+                    <img src="img/portada.webp" alt="Marketing Digital Guide">
+                </div>
+                <div class="book-info">
+                    <h3>Marketing Digital: Guía Completa</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-number">(4.5)</span>
+                    </div>
+                    <div class="book-price">$9.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+            <div class="ebook" data-id="2">
+                <div class="book-cover">
+                    <img src="https://hablamosdelibros.es/wp-content/uploads/2023/09/MU00524701.jpg" alt="JavaScript Guide">
+                </div>
+                <div class="book-info">
+                    <h3>JavaScript: The Complete Guide</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★</div>
+                        <span class="rating-number">(4.2)</span>
+                    </div>
+                    <div class="book-price">$15.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+            <div class="ebook" data-id="3">
+                <div class="book-cover">
+                    <img src="https://edit.org/img/blog/t9i-edit-book-covers-online.jpg" alt="Marketing Digital">
+                </div>
+                <div class="book-info">
+                    <h3>Marketing Digital Avanzado</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-number">(4.8)</span>
+                    </div>
+                    <div class="book-price">$24.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+
+            <div class="ebook" data-id="4">
+                <div class="book-cover">
+                    <img src="https://marketplace.canva.com/EAFUYnraMGk/1/0/1003w/canva-brown-rustic-mystery-novel-book-cover-hG1QhA7BiBM.jpg" alt="Python Programming">
+                </div>
+                <div class="book-info">
+                    <h3>Python para Principiantes</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-number">(4.9)</span>
+                    </div>
+                    <div class="book-price">$19.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+
+            <div class="ebook" data-id="5">
+                <div class="book-cover">
+                    <img src="https://marketplace.canva.com/EAFaQMYuZbo/1/0/1003w/canva-brown-vintage-old-book-cover-GxM1RgGG5Us.jpg" alt="Desarrollo Personal">
+                </div>
+                <div class="book-info">
+                    <h3>Hábitos Atómicos</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-number">(4.7)</span>
+                    </div>
+                    <div class="book-price">$12.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+
+            <div class="ebook" data-id="6">
+                <div class="book-cover">
+                    <img src="https://marketplace.canva.com/EAFaQYVW5bw/1/0/1003w/canva-black-bold-cooking-book-cover-LYmO-vTHp6M.jpg" alt="Cocina">
+                </div>
+                <div class="book-info">
+                    <h3>Cocina Mediterránea</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★</div>
+                        <span class="rating-number">(4.5)</span>
+                    </div>
+                    <div class="book-price">$16.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+
+            <div class="ebook" data-id="7">
+                <div class="book-cover">
+                    <img src="https://marketplace.canva.com/EAFaQR6QxfQ/1/0/1003w/canva-black-and-cream-modern-coming-of-age-book-cover-cSc7KLImGgw.jpg" alt="UX/UI">
+                </div>
+                <div class="book-info">
+                    <h3>Diseño UX/UI Moderno</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-number">(4.6)</span>
+                    </div>
+                    <div class="book-price">$22.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+
+            <div class="ebook" data-id="8">
+                <div class="book-cover">
+                    <img src="https://marketplace.canva.com/EAFaQpLcoc4/1/0/1003w/canva-green-and-cream-illustrative-mindfulness-self-help-book-cover-wUa_8J-7TZ0.jpg" alt="Mindfulness">
+                </div>
+                <div class="book-info">
+                    <h3>Mindfulness para Principiantes</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★</div>
+                        <span class="rating-number">(4.3)</span>
+                    </div>
+                    <div class="book-price">$14.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+
+            <div class="ebook" data-id="9">
+                <div class="book-cover">
+                    <img src="https://marketplace.canva.com/EAFaQNV5eDc/1/0/1003w/canva-white-minimalist-business-book-cover-YZ0R4T9_jj8.jpg" alt="Negocios">
+                </div>
+                <div class="book-info">
+                    <h3>Estrategias de Inversión</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-number">(4.8)</span>
+                    </div>
+                    <div class="book-price">$27.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+
+            <div class="ebook" data-id="10">
+                <div class="book-cover">
+                    <img src="https://marketplace.canva.com/EAFaQZc_0FQ/1/0/1003w/canva-blue-illustrated-science-fiction-book-cover-HwwL2OyJ6Ys.jpg" alt="React">
+                </div>
+                <div class="book-info">
+                    <h3>React.js Profesional</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-number">(4.9)</span>
+                    </div>
+                    <div class="book-price">$25.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+
+            <div class="ebook" data-id="11">
+                <div class="book-cover">
+                    <img src="https://marketplace.canva.com/EAFaQNQhaxY/1/0/1003w/canva-dark-blue-simple-educational-book-cover-qw3KwqQevXY.jpg" alt="SQL">
+                </div>
+                <div class="book-info">
+                    <h3>SQL y Bases de Datos</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★</div>
+                        <span class="rating-number">(4.4)</span>
+                    </div>
+                    <div class="book-price">$18.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+
+            <div class="ebook" data-id="12">
+                <div class="book-cover">
+                    <img src="https://marketplace.canva.com/EAFaQcVQ7XY/1/0/1003w/canva-cream-and-black-modern-novel-book-cover-9iep1UJ7Bkg.jpg" alt="HTML CSS">
+                </div>
+                <div class="book-info">
+                    <h3>HTML5 y CSS3 Moderno</h3>
+                    <div class="book-rating">
+                        <div class="stars">★★★★★</div>
+                        <span class="rating-number">(4.7)</span>
+                    </div>
+                    <div class="book-price">$17.99</div>
+                    <button class="details-button">Más Detalles</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 eBook Store. All rights reserved.</p>
+    </footer>
+
+    <!-- Reemplaza los modales existentes con estos -->
+    <div class="modal" id="bookModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-body">
+                <div class="modal-book-cover">
+                    <img src="" alt="Book Cover" id="modalBookCover">
+                </div>
+                <div class="modal-book-info">
+                    <h2 id="modalBookTitle"></h2>
+                    <div class="modal-book-rating">
+                        <div class="stars" id="modalBookRating"></div>
+                        <span class="rating-number" id="modalBookRatingNumber"></span>
+                    </div>
+                    <div class="modal-book-price" id="modalBookPrice"></div>
+                    <div class="modal-book-description" id="modalBookDescription"></div>
+                    <div class="modal-actions">
+                        <button class="add-to-cart-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                            Agregar al Carrito
+                        </button>
+                        <button class="buy-now-btn">
+                            <i class="fas fa-bolt"></i>
+                            Comprar Ahora
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="paymentModal">
+        <div class="modal-content payment-modal">
+            <span class="close-modal">&times;</span>
+            <div class="modal-body">
+                <div class="payment-header">
+                    <h2>Finalizar Compra</h2>
+                    <p class="payment-subtitle">Complete sus datos para recibir el eBook</p>
+                </div>
+                
+                <form id="purchaseForm" class="purchase-form">
+                    <div class="form-section personal-info">
+                        <h3>Datos Personales</h3>
+                        <div class="form-group">
+                            <input type="text" id="nombre" required placeholder="Nombre completo">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" required placeholder="Email">
+                            <small class="form-hint">Recibirás el eBook en este correo</small>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="telefono" required placeholder="Teléfono">
+                        </div>
+                    </div>
+
+                    <div class="form-section payment-info">
+                        <h3>Datos para la Transferencia</h3>
+                        <div class="payment-details">
+                            <div class="payment-option">
+                                <p><strong>Mercado Pago:</strong></p>
+                                <p>CVU: 0000000000000000000000</p>
+                                <p>Alias: tu.alias.mp</p>
+                            </div>
+                            <div class="payment-option">
+                                <p><strong>Cuenta Bancaria:</strong></p>
+                                <p>CBU: 0000000000000000000000</p>
+                                <p>Alias: tu.alias.banco</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section upload-section">
+                        <h3>Comprobante de Pago</h3>
+                        <div class="file-upload">
+                            <input type="file" id="comprobante" name="comprobante" required accept="image/*,.pdf">
+                            <label for="comprobante" id="upload-label">
+                                <i class="fas fa-upload"></i>
+                                <span>Adjuntar comprobante de pago</span>
+                            </label>
+                            <small class="form-hint">Formatos aceptados: imágenes y PDF</small>
+                            <div id="file-preview"></div>
+                        </div>
+                    </div>
+
+                    <div class="purchase-notice">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Una vez verificado el comprobante, recibirás el eBook en tu correo electrónico.</p>
+                    </div>
+
+                    <button type="submit" class="proceed-payment-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Enviar Pedido
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Replace the existing EmailJS script -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        (function() {
+            emailjs.init("-avaKSi0GQ1MQ2I-4"); // Pega aquí la Public Key que ves en Account
+        })();
+    </script>
+    <script src="src/js/bookDetails.js"></script>
+    <script src="src/js/cart.js"></script>
+    <script src="src/js/main.js"></script>
+    <script src="src/js/store.js"></script>
+    <script>
+        async function sendEmail(emailData) {
+            await emailjs.send(
+                'eBookStore', // Pega aquí el Service ID
+                'template_f01zwii', // Pega aquí el Template ID
+                emailData
+            );
+        }
+    </script>
+</body>
+</html>
