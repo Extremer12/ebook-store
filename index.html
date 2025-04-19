@@ -270,7 +270,7 @@
                 <div class="modal-book-cover">
                     <img src="" alt="Book Cover" id="modalBookCover">
                 </div>
-                <div class="modal-book-info">
+                <div class="modal-book-info" data-book-id="">
                     <h2 id="modalBookTitle"></h2>
                     <div class="modal-book-rating">
                         <div class="stars" id="modalBookRating"></div>
@@ -297,58 +297,56 @@
         <div class="modal-content payment-modal">
             <span class="close-modal">&times;</span>
             <div class="modal-body">
-                <div class="payment-header">
-                    <h2>Finalizar Compra</h2>
-                    <p class="payment-subtitle">Complete sus datos para recibir el eBook</p>
+                <!-- Resumen de la compra -->
+                <div class="purchase-summary">
+                    <h3>Resumen de la Compra</h3>
+                    <p>Libro: <span id="summaryBookTitle"></span></p>
+                    <p>Precio: <span id="summaryPrice"></span></p>
                 </div>
-                
+
                 <form id="purchaseForm" class="purchase-form">
+                    <!-- Sección de datos de pago -->
+                    <div class="form-section payment-info">
+                        <h3>Datos de Pago</h3>
+                        <div class="payment-details">
+                            <p><strong>Alias:</strong> CRISTIAN.BOOK</p>
+                            <p><strong>CVU:</strong> 0000003100047548657778</p>
+                            <p><strong>CBU:</strong> 0720394488000036560786</p>
+                            <div class="payment-instructions">
+                                <p>1. Realiza la transferencia por el monto del libro</p>
+                                <p>2. Toma captura o guarda el comprobante</p>
+                                <p>3. Sube el comprobante y completa tus datos</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Datos personales existentes -->
                     <div class="form-section personal-info">
                         <h3>Datos Personales</h3>
                         <div class="form-group">
-                            <input type="text" id="nombre" required placeholder="Nombre completo">
+                            <label for="nombre">Nombre Completo</label>
+                            <input type="text" id="nombre" name="nombre" required>
                         </div>
                         <div class="form-group">
-                            <input type="email" id="email" required placeholder="Email">
-                            <small class="form-hint">Recibirás el eBook en este correo</small>
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
                         </div>
                         <div class="form-group">
-                            <input type="tel" id="telefono" required placeholder="Teléfono">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono" required>
                         </div>
                     </div>
 
-                    <div class="form-section payment-info">
-                        <h3>Datos para la Transferencia</h3>
-                        <div class="payment-details">
-                            <div class="payment-option">
-                                <p><strong>Mercado Pago:</strong></p>
-                                <p>CVU: 0000000000000000000000</p>
-                                <p>Alias: tu.alias.mp</p>
-                            </div>
-                            <div class="payment-option">
-                                <p><strong>Cuenta Bancaria:</strong></p>
-                                <p>CBU: 0000000000000000000000</p>
-                                <p>Alias: tu.alias.banco</p>
-                            </div>
-                        </div>
-                    </div>
-
+                    <!-- Sección de comprobante -->
                     <div class="form-section upload-section">
-                        <h3>Comprobante de Pago</h3>
                         <div class="file-upload">
                             <input type="file" id="comprobante" name="comprobante" required accept="image/*,.pdf">
                             <label for="comprobante" id="upload-label">
                                 <i class="fas fa-upload"></i>
                                 <span>Adjuntar comprobante de pago</span>
                             </label>
-                            <small class="form-hint">Formatos aceptados: imágenes y PDF</small>
                             <div id="file-preview"></div>
                         </div>
-                    </div>
-
-                    <div class="purchase-notice">
-                        <i class="fas fa-info-circle"></i>
-                        <p>Una vez verificado el comprobante, recibirás el eBook en tu correo electrónico.</p>
                     </div>
 
                     <button type="submit" class="proceed-payment-btn">
@@ -359,25 +357,16 @@
             </div>
         </div>
     </div>
-    <!-- Replace the existing EmailJS script -->
+    <!-- Modifica los scripts al final del body para usar type="module" -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
         (function() {
-            emailjs.init("-avaKSi0GQ1MQ2I-4"); // Pega aquí la Public Key que ves en Account
+            emailjs.init("-avaKSi0GQ1MQ2I-4");
         })();
     </script>
-    <script src="src/js/bookDetails.js"></script>
-    <script src="src/js/cart.js"></script>
-    <script src="src/js/main.js"></script>
-    <script src="src/js/store.js"></script>
-    <script>
-        async function sendEmail(emailData) {
-            await emailjs.send(
-                'eBookStore', // Pega aquí el Service ID
-                'template_f01zwii', // Pega aquí el Template ID
-                emailData
-            );
-        }
-    </script>
+    <script type="module" src="src/js/store.js"></script>
+    <script type="module" src="src/js/bookDetails.js"></script>
+    <script type="module" src="src/js/cart.js"></script>
+    <script type="module" src="src/js/main.js"></script>
 </body>
 </html>
