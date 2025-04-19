@@ -1,3 +1,5 @@
+import { fetchEbooks, getEbookById } from './store.js';
+
 // bookDetails.js
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -7,12 +9,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentModal = document.getElementById('paymentModal');
     const closeButtons = document.querySelectorAll('.close-modal');
     const buyNowBtn = document.querySelector('.buy-now-btn');
-    const purchaseForm = document.getElementById('purchaseForm');
     const fileInput = document.getElementById('comprobante');
     const filePreview = document.getElementById('file-preview');
+    const purchaseForm = document.getElementById('purchaseForm');
+    const uploadLabel = document.getElementById('upload-label');
 
     // Inicializar EmailJS
-    emailjs.init("TU_PUBLIC_KEY"); // Reemplaza con tu public key de EmailJS
+    emailjs.init("-avaKSi0GQ1MQ2I-4"); // Reemplaza con tu public key de EmailJS
 
     // Event Listeners
     detailsButtons.forEach(button => {
@@ -25,11 +28,129 @@ document.addEventListener('DOMContentLoaded', function() {
 
     buyNowBtn?.addEventListener('click', handleBuyNow);
     
-    // Manejo de archivo adjunto
-    fileInput?.addEventListener('change', handleFileSelect);
+    // Manejo de archivo
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+    }
 
     // Manejo del formulario
-    purchaseForm?.addEventListener('submit', handlePurchaseSubmit);
+    if (purchaseForm) {
+        purchaseForm.addEventListener('submit', handleFormSubmit);
+    }
+
+    // Función para manejar la selección de archivos
+    async function handleFileSelect(e) {
+        const file = e.target.files[0];
+        console.log('Archivo seleccionado:', file); // Debug
+
+        if (!file) {
+            filePreview.innerHTML = '';
+            return;
+        }
+
+        // Actualizar label
+        const span = uploadLabel?.querySelector('span');
+        if (span) span.textContent = file.name;
+
+        // Limpiar preview anterior
+        filePreview.innerHTML = '';
+
+        // Crear preview según tipo de archivo
+        if (file.type.startsWith('image/')) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.cssText = `
+                max-width: 200px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                margin: 10px auto;
+                display: block;
+            `;
+            filePreview.appendChild(img);
+            console.log('Preview de imagen creado'); // Debug
+        } else if (file.type === 'application/pdf') {
+            const div = document.createElement('div');
+            div.className = 'preview-pdf';
+            div.innerHTML = `
+                <i class="fas fa-file-pdf"></i>
+                <span class="file-name">${file.name}</span>
+            `;
+            filePreview.appendChild(div);
+            console.log('Preview de PDF creado'); // Debug
+        }
+    }
+
+    // Función para manejar el envío del formulario
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        console.log('Iniciando envío del formulario'); // Debug
+
+        const submitBtn = document.querySelector('.proceed-payment-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+        try {
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const libro = document.getElementById('modalBookTitle').textContent;
+            const precio = document.getElementById('modalBookPrice').textContent;
+            const file = fileInput.files[0];
+
+            if (!file) {
+                throw new Error('Por favor adjunta el comprobante de pago');
+            }
+
+            const base64File = await fileToBase64(file);
+            console.log('Archivo convertido a base64'); // Debug
+
+            const templateParams = {
+                libro: libro,
+                de_nombre: nombre,
+                de_correo_electronico: email,
+                telefono: telefono,
+                precio: precio,
+                comprobante: base64File
+            };
+
+            console.log('Enviando email...'); // Debug
+
+            const response = await emailjs.send(
+                'service_kfjagfc',    // Tu Service ID
+                'template_f01zwii',   // Tu Template ID
+                templateParams
+            );
+
+            console.log('Respuesta EmailJS:', response); // Debug
+
+            if (response.status === 200) {
+                alert(`¡Pedido enviado con éxito! Recibirás el eBook en ${email} una vez verificado el pago.`);
+                document.getElementById('paymentModal').style.display = 'none';
+                purchaseForm.reset();
+                filePreview.innerHTML = '';
+                uploadLabel.querySelector('span').textContent = 'Adjuntar comprobante de pago';
+            } else {
+                throw new Error('Error en el envío del email');
+            }
+
+        } catch (error) {
+            console.error('Error detallado:', error); // Debug
+            alert('Error al enviar el pedido: ' + error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Pedido';
+        }
+    }
+
+    // Función auxiliar para convertir archivo a base64
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
 
     function handleDetailsClick() {
         const bookCard = this.closest('.ebook');
@@ -57,103 +178,75 @@ document.addEventListener('DOMContentLoaded', function() {
         paymentModal.style.display = 'block';
     }
 
-    function handleFileSelect(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const fileSpan = document.querySelector('#upload-label span');
-        fileSpan.textContent = file.name;
-
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                filePreview.innerHTML = `
-                    <div class="preview-image">
-                        <img src="${e.target.result}" alt="Preview">
-                        <span class="file-name">${file.name}</span>
-                    </div>
-                `;
-            };
-            reader.readAsDataURL(file);
-        } else if (file.type === 'application/pdf') {
-            filePreview.innerHTML = `
-                <div class="preview-pdf">
-                    <i class="fas fa-file-pdf"></i>
-                    <span class="file-name">${file.name}</span>
-                </div>
-            `;
-        }
-    }
-
     async function handlePurchaseSubmit(e) {
         e.preventDefault();
+        console.log('Iniciando envío del formulario...');
 
         const submitBtn = document.querySelector('.proceed-payment-btn');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
-        const formData = new FormData(this);
-        const file = document.getElementById('comprobante').files[0];
-
         try {
-            // Convert file to base64
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const telefono = document.getElementById('telefono').value;
+            const libro = document.getElementById('modalBookTitle').textContent;
+            const precio = document.getElementById('modalBookPrice').textContent;
+            const fileInput = document.getElementById('comprobante');
+
+            if (!fileInput.files || !fileInput.files[0]) {
+                throw new Error('Por favor adjunta el comprobante de pago');
+            }
+
+            const file = fileInput.files[0];
             const base64File = await fileToBase64(file);
 
-            // Prepare email data
-            const emailData = {
-                from_name: document.getElementById('nombre').value,
-                from_email: document.getElementById('email').value,
-                phone: document.getElementById('telefono').value,
-                book_title: document.getElementById('modalBookTitle').textContent,
-                book_price: document.getElementById('modalBookPrice').textContent,
-                receipt: base64File,
-                receipt_name: file.name
+            // Usar exactamente los mismos nombres que en la prueba exitosa de EmailJS
+            const templateParams = {
+                libro: libro,
+                de_nombre: nombre,
+                de_correo_electronico: email,
+                telefono: telefono,
+                precio: precio,
+                comprobante: base64File
             };
 
-            // Send email using EmailJS
-            await emailjs.send(
-                'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-                'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
-                emailData
+            console.log('Enviando email con parámetros:', templateParams);
+
+            const response = await emailjs.send(
+                "service_kfjagfc",      // Tu Service ID verificado
+                "template_f01zwii",     // Tu Template ID
+                templateParams
             );
 
-            showSuccessMessage(emailData.from_email);
+            console.log('Respuesta de EmailJS:', response);
+
+            if (response.status === 200) {
+                alert(`¡Pedido enviado con éxito! Recibirás el eBook en ${email} una vez verificado el pago.`);
+                document.getElementById('paymentModal').style.display = 'none';
+                document.getElementById('purchaseForm').reset();
+                document.getElementById('file-preview').innerHTML = '';
+            } else {
+                throw new Error('Error en el envío del email');
+            }
+
         } catch (error) {
-            console.error('Error:', error);
-            showErrorMessage();
+            console.error('Error detallado:', error);
+            alert('Error al enviar el pedido: ' + error.message);
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Pedido';
         }
     }
 
-    function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
-    }
-
     function showSuccessMessage(email) {
-        paymentModal.innerHTML = `
-            <div class="modal-content payment-modal">
-                <div class="success-message">
-                    <i class="fas fa-check-circle"></i>
-                    <h2>¡Pedido Enviado!</h2>
-                    <p>Hemos recibido tu pedido correctamente.</p>
-                    <p>Una vez verificado el pago, recibirás el eBook en: ${email}</p>
-                    <button onclick="location.reload()" class="close-success-btn">
-                        Aceptar
-                    </button>
-                </div>
-            </div>
-        `;
+        alert(`¡Pedido enviado con éxito! Recibirás el eBook en ${email} una vez verificado el pago.`);
+        document.getElementById('paymentModal').style.display = 'none';
+        document.getElementById('purchaseForm').reset();
     }
 
     function showErrorMessage() {
-        alert('Hubo un error al procesar tu pedido. Por favor, intenta nuevamente.');
+        alert('Hubo un error al procesar el pedido. Por favor, intenta nuevamente.');
     }
 
     function convertToBase64(file) {
@@ -199,29 +292,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const plusBtn = document.querySelector('.plus');
     const quantityInput = document.querySelector('.quantity-input');
 
-    minusBtn.addEventListener('click', () => {
-        let value = parseInt(quantityInput.value);
-        if (value > 1) {
-            quantityInput.value = value - 1;
-        }
-    });
+    // Agregar verificación antes de usar los botones
+    if (minusBtn && plusBtn && quantityInput) {
+        minusBtn.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            if (value > 1) {
+                quantityInput.value = value - 1;
+            }
+        });
 
-    plusBtn.addEventListener('click', () => {
-        let value = parseInt(quantityInput.value);
-        if (value < 99) {
-            quantityInput.value = value + 1;
-        }
-    });
+        plusBtn.addEventListener('click', () => {
+            let value = parseInt(quantityInput.value);
+            if (value < 99) {
+                quantityInput.value = value + 1;
+            }
+        });
+    }
 
     // Function to display the details of the selected eBook
-    function displayBookDetails(book) {
-        const titleElement = document.querySelector('.book-info h3');
-        const priceElement = document.querySelector('.book-info .book-price');
-        const ratingElement = document.querySelector('.book-info .book-rating');
+    function displayBookDetails(bookId) {
+        const book = getEbookById(bookId); // Ahora puedes usar la función importada
+        if (book) {
+            const titleElement = document.querySelector('.book-info h3');
+            const priceElement = document.querySelector('.book-info .book-price');
+            const ratingElement = document.querySelector('.book-info .book-rating');
 
-        if (titleElement) titleElement.textContent = book.title;
-        if (priceElement) priceElement.textContent = `$${book.price.toFixed(2)}`;
-        if (ratingElement) ratingElement.textContent = `Rating: ${book.rating} stars`;
+            if (titleElement) titleElement.textContent = book.title;
+            if (priceElement) priceElement.textContent = `$${book.price.toFixed(2)}`;
+            if (ratingElement) ratingElement.textContent = `Rating: ${book.rating} stars`;
+        }
     }
 
     // Function to fetch eBook details based on the selected book ID
@@ -257,140 +356,461 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Manejar el formulario de compra
-    purchaseForm?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        showLoadingState();
-        
-        try {
-            // Simular envío de email
-            await simulateEmailSending(formData);
-            showSuccessMessage();
-        } catch (error) {
-            console.error('Error:', error);
-            showErrorMessage();
-        } finally {
-            hideLoadingState();
+    function reinitializePurchaseForm() {
+        if (purchaseForm) {
+            // Remover handlers existentes
+            const newPurchaseForm = purchaseForm.cloneNode(true);
+            purchaseForm.parentNode.replaceChild(newPurchaseForm, purchaseForm);
+            
+            // Remover los otros event listeners y agregar solo el principal
+            newPurchaseForm.addEventListener('submit', handlePurchaseSubmit);
+            
+            // Actualizar la referencia
+            return newPurchaseForm;
         }
-    });
-
-    function showLoadingState() {
-        const btn = document.querySelector('.proceed-payment-btn');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-        }
+        return null;
     }
 
-    function hideLoadingState() {
-        const btn = document.querySelector('.proceed-payment-btn');
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Pedido';
-        }
-    }
+    // Inicializar el formulario
+    const updatedForm = reinitializePurchaseForm();
+});
 
-    function showSuccessMessage() {
-        const paymentModal = document.getElementById('paymentModal');
-        if (paymentModal) {
-            paymentModal.innerHTML = `
-                <div class="modal-content payment-modal">
-                    <div class="success-message">
-                        <i class="fas fa-check-circle"></i>
-                        <h2>¡Pedido Enviado!</h2>
-                        <p>Hemos recibido tu solicitud correctamente.</p>
-                        <p>Una vez verificado el pago, recibirás el eBook en tu correo.</p>
-                        <button onclick="location.reload()" class="close-success-btn">
-                            Aceptar
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('comprobante');
+    const filePreview = document.getElementById('file-preview');
+    const purchaseForm = document.getElementById('purchaseForm');
 
-    function showErrorMessage() {
-        alert('Hubo un error al procesar tu pedido. Por favor, intenta nuevamente.');
-    }
-
-    function simulateEmailSending(formData) {
+    // Función para comprimir imagen
+    async function compressImage(file) {
         return new Promise((resolve) => {
-            setTimeout(resolve, 2000);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Calcular nuevas dimensiones manteniendo proporción
+                    if (width > height) {
+                        if (width > 800) {
+                            height *= 800 / width;
+                            width = 800;
+                        }
+                    } else {
+                        if (height > 800) {
+                            width *= 800 / height;
+                            height = 800;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convertir a base64 con calidad reducida
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    resolve(compressedBase64);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         });
     }
 
-    // Mostrar nombre del archivo seleccionado
-    fileInput?.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            // Actualizar texto del label
-            uploadLabel.querySelector('span').textContent = file.name;
+    // Manejador de archivo
+    if (fileInput) {
+        fileInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-            // Mostrar preview si es imagen
+            console.log('Archivo seleccionado:', file.name, 'Tamaño:', file.size/1024/1024, 'MB');
+
+            // Mostrar preview
+            filePreview.innerHTML = '';
             if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    filePreview.innerHTML = `
-                        <div class="preview-image">
-                            <img src="${e.target.result}" alt="Preview">
-                            <span class="file-name">${file.name}</span>
-                        </div>
-                    `;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                // Si es PDF mostrar ícono
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.style.cssText = 'max-width: 200px; margin: 10px auto; display: block; border-radius: 8px;';
+                filePreview.appendChild(img);
+            } else if (file.type === 'application/pdf') {
                 filePreview.innerHTML = `
                     <div class="preview-pdf">
                         <i class="fas fa-file-pdf"></i>
                         <span class="file-name">${file.name}</span>
-                    </div>
-                `;
+                    </div>`;
             }
+        });
+    }
+
+    // Manejador del formulario
+    if (purchaseForm) {
+        purchaseForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target; // Guardar referencia al formulario actual
+            const submitBtn = form.querySelector('.proceed-payment-btn');
+            
+            try {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+                }
+
+                const file = fileInput?.files[0];
+                if (!file) {
+                    throw new Error('Por favor adjunta el comprobante de pago');
+                }
+
+                let comprobante;
+                if (file.type.startsWith('image/')) {
+                    comprobante = await compressImage(file);
+                } else if (file.type === 'application/pdf') {
+                    if (file.size > 500000) {
+                        throw new Error('El PDF es demasiado grande. Máximo 500KB permitido');
+                    }
+                    comprobante = await fileToBase64(file);
+                }
+
+                const templateParams = {
+                    libro: document.getElementById('modalBookTitle')?.textContent || '',
+                    de_nombre: form.querySelector('#nombre')?.value || '',
+                    de_correo_electronico: form.querySelector('#email')?.value || '',
+                    telefono: form.querySelector('#telefono')?.value || '',
+                    precio: document.getElementById('modalBookPrice')?.textContent || '',
+                    comprobante: comprobante
+                };
+
+                const response = await emailjs.send(
+                    'service_kfjagfc',
+                    'template_f01zwii',
+                    templateParams
+                );
+
+                if (response.status === 200) {
+                    alert(`¡Pedido enviado con éxito! Recibirás el eBook en ${templateParams.de_correo_electronico} una vez verificado el pago.`);
+                    if (form) {
+                        form.reset();
+                        filePreview.innerHTML = '';
+                        const paymentModal = document.getElementById('paymentModal');
+                        if (paymentModal) paymentModal.style.display = 'none';
+                    }
+                } else {
+                    throw new Error('Error en el envío del email');
+                }
+
+            } catch (error) {
+                console.error('Error detallado:', error);
+                alert('Error: ' + (error.text || error.message || 'Error al procesar el pedido'));
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Pedido';
+                }
+            }
+        });
+    }
+
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+});
+
+async function sendPurchaseEmail(formData) {
+    try {
+        const fileInput = document.getElementById('comprobante');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            throw new Error('No se encontró el archivo adjunto');
         }
-    });
 
-    // Manejar envío del formulario
-    purchaseForm?.addEventListener('submit', async function(e) {
+        // Verificar tamaño del archivo
+        const fileSizeMB = file.size / (1024 * 1024);
+        if (fileSizeMB > 5) {
+            throw new Error('El archivo es demasiado grande. Máximo 5MB permitido');
+        }
+
+        // Convertir a base64 y comprimir si es necesario
+        let base64File;
+        if (file.type.startsWith('image/')) {
+            base64File = await compressImage(file);
+        } else {
+            base64File = await fileToBase64(file);
+        }
+
+        const templateParams = {
+            libro: document.getElementById('summaryBookTitle').textContent,
+            de_nombre: formData.get('nombre'),
+            de_correo_electronico: formData.get('email'),
+            telefono: formData.get('telefono'),
+            precio: document.getElementById('summaryPrice').textContent,
+            comprobante: base64File
+        };
+
+        console.log('Enviando email...'); // Debug
+        const response = await emailjs.send(
+            'service_kfjagfc',
+            'template_f01zwii',
+            templateParams
+        );
+
+        console.log('Respuesta:', response); // Debug
+        return response;
+
+    } catch (error) {
+        console.error('Error en sendPurchaseEmail:', error);
+        throw error;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos DOM
+    const fileInput = document.getElementById('comprobante');
+    const filePreview = document.getElementById('file-preview');
+    const purchaseForm = document.getElementById('purchaseForm');
+    const uploadLabel = document.getElementById('upload-label');
+    
+    // Inicializar EmailJS
+    emailjs.init("-avaKSi0GQ1MQ2I-4");
+
+    // Manejador de archivo
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+    }
+
+    // Manejador del formulario - SOLO UN EVENT LISTENER
+    if (purchaseForm) {
+        purchaseForm.addEventListener('submit', handleFormSubmit);
+    }
+
+    async function handleFormSubmit(e) {
         e.preventDefault();
-
-        const formData = new FormData();
-        formData.append('nombre', document.getElementById('nombre').value);
-        formData.append('email', document.getElementById('email').value);
-        formData.append('telefono', document.getElementById('telefono').value);
-        formData.append('libro', document.getElementById('modalBookTitle').textContent);
-        formData.append('precio', document.getElementById('modalBookPrice').textContent);
-        formData.append('comprobante', fileInput.files[0]);
-
-        // Mostrar estado de carga
-        const submitBtn = document.querySelector('.proceed-payment-btn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        const form = e.target;
+        const submitBtn = form.querySelector('.proceed-payment-btn');
 
         try {
-            // Enviar email usando EmailJS
-            await emailjs.send(
-                'YOUR_SERVICE_ID',
-                'YOUR_TEMPLATE_ID',
-                {
-                    to_email: 'cristianbordon258@gmail.com',
-                    from_name: formData.get('nombre'),
-                    from_email: formData.get('email'),
-                    telefono: formData.get('telefono'),
-                    libro: formData.get('libro'),
-                    precio: formData.get('precio')
-                }
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            }
+
+            const file = fileInput?.files[0];
+            if (!file) {
+                throw new Error('Por favor adjunta el comprobante de pago');
+            }
+
+            let comprobante = await processFile(file);
+
+            const templateParams = {
+                libro: document.getElementById('modalBookTitle')?.textContent || '',
+                de_nombre: form.querySelector('#nombre')?.value || '',
+                de_correo_electronico: form.querySelector('#email')?.value || '',
+                telefono: form.querySelector('#telefono')?.value || '',
+                precio: document.getElementById('modalBookPrice')?.textContent || '',
+                comprobante: comprobante
+            };
+
+            const response = await emailjs.send(
+                'service_kfjagfc',
+                'template_f01zwii',
+                templateParams
             );
 
-            showSuccessMessage();
+            if (response.status === 200) {
+                alert(`¡Pedido enviado con éxito! Recibirás el eBook en ${templateParams.de_correo_electronico} una vez verificado el pago.`);
+                resetForm(form);
+            } else {
+                throw new Error('Error en el envío del email');
+            }
+
         } catch (error) {
             console.error('Error:', error);
-            showErrorMessage();
+            alert('Error: ' + (error.text || error.message || 'Error al procesar el pedido'));
         } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Pedido';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Pedido';
+            }
         }
-    });
+    }
+
+    function resetForm(form) {
+        if (form) {
+            form.reset();
+            if (filePreview) filePreview.innerHTML = '';
+            if (uploadLabel) {
+                const span = uploadLabel.querySelector('span');
+                if (span) span.textContent = 'Adjuntar comprobante de pago';
+            }
+            const paymentModal = document.getElementById('paymentModal');
+            if (paymentModal) paymentModal.style.display = 'none';
+        }
+    }
+
+    async function processFile(file) {
+        if (file.type.startsWith('image/')) {
+            return await compressImage(file);
+        } else if (file.type === 'application/pdf') {
+            if (file.size > 500000) {
+                throw new Error('El PDF es demasiado grande. Máximo 500KB permitido');
+            }
+            return await fileToBase64(file);
+        }
+        throw new Error('Tipo de archivo no soportado');
+    }
+
+    // ... resto del código existente (handleFileSelect, compressImage, fileToBase64) ...
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos DOM
+    const fileInput = document.getElementById('comprobante');
+    const filePreview = document.getElementById('file-preview');
+    const purchaseForm = document.getElementById('purchaseForm');
+    const uploadLabel = document.getElementById('upload-label');
+
+    // Event Listeners
+    if (fileInput) {
+        fileInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            console.log('Archivo seleccionado:', file.name, 'Tamaño:', file.size/1024/1024, 'MB');
+
+            // Actualizar label
+            if (uploadLabel) {
+                const span = uploadLabel.querySelector('span');
+                if (span) span.textContent = file.name;
+            }
+
+            // Mostrar preview
+            if (filePreview) {
+                filePreview.innerHTML = '';
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.style.cssText = 'max-width: 200px; margin: 10px auto; display: block; border-radius: 8px;';
+                    filePreview.appendChild(img);
+                } else if (file.type === 'application/pdf') {
+                    filePreview.innerHTML = `
+                        <div class="preview-pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            <span class="file-name">${file.name}</span>
+                        </div>`;
+                }
+            }
+        });
+    }
+
+    // Manejador del formulario
+    if (purchaseForm) {
+        purchaseForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('.proceed-payment-btn');
+            
+            try {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+                }
+
+                const file = fileInput?.files[0];
+                if (!file) {
+                    throw new Error('Por favor adjunta el comprobante de pago');
+                }
+
+                let comprobante;
+                if (file.type.startsWith('image/')) {
+                    comprobante = await compressImage(file);
+                } else if (file.type === 'application/pdf') {
+                    if (file.size > 500000) {
+                        throw new Error('El PDF es demasiado grande. Máximo 500KB permitido');
+                    }
+                    comprobante = await fileToBase64(file);
+                }
+
+                const templateParams = {
+                    libro: document.getElementById('summaryBookTitle')?.textContent || '',
+                    de_nombre: document.getElementById('nombre')?.value || '',
+                    de_correo_electronico: document.getElementById('email')?.value || '',
+                    telefono: document.getElementById('telefono')?.value || '',
+                    precio: document.getElementById('summaryPrice')?.textContent || '',
+                    comprobante: comprobante
+                };
+
+                const response = await emailjs.send(
+                    'service_kfjagfc',
+                    'template_f01zwii',
+                    templateParams
+                );
+
+                if (response.status === 200) {
+                    alert(`¡Pedido enviado con éxito! Recibirás el eBook en ${templateParams.de_correo_electronico} una vez verificado el pago.`);
+                    e.target.reset();
+                    if (filePreview) filePreview.innerHTML = '';
+                    if (uploadLabel) {
+                        const span = uploadLabel.querySelector('span');
+                        if (span) span.textContent = 'Adjuntar comprobante de pago';
+                    }
+                    const paymentModal = document.getElementById('paymentModal');
+                    if (paymentModal) paymentModal.style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Error detallado:', error);
+                alert('Error: ' + (error.text || error.message || 'Error al procesar el pedido'));
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Pedido';
+                }
+            }
+        });
+    }
+
+    // Funciones auxiliares
+    async function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height && width > 800) {
+                        height *= 800 / width;
+                        width = 800;
+                    } else if (height > 800) {
+                        width *= 800 / height;
+                        height = 800;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
 });
